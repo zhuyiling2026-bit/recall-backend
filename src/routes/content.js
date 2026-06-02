@@ -62,12 +62,59 @@ router.post('/confirm', async (req, res, next) => {
   }
 });
 
-router.get('/list', async (_req, res, next) => {
+router.post('/quick-save', async (req, res, next) => {
   try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'url is required' });
+
+    let html;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return res.status(422).json({ error: `Failed to fetch URL: ${response.status}` });
+      html = await response.text();
+    } catch {
+      return res.status(422).json({ error: 'Failed to fetch URL' });
+    }
+
+    const { parse } = await import('node-html-parser');
+    const root = parse(html);
+    root.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+    const text = root.textContent.replace(/\s+/g, ' ').trim();
+    if (!text) return res.status(422).json({ error: 'No text content found' });
+
+    const { analyzeContent } = await import('../services/claude.js');
+    const analysis = await analyzeContent(text);
+
     const { data, error } = await supabase
+      .from('contents')
+      .insert({ url, ...analysis })
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: `Database error: ${error.message}` });
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/list', async (req, res, next) => {
+  try {
+    const { q } = req.query;
+
+    let query = supabase
       .from('contents')
       .select('*')
       .order('created_at', { ascending: false });
+
+    if (q && q.trim()) {
+      const pattern = `%${q.trim()}%`;
+      query = query.or(
+        `title.ilike.${pattern},summary.ilike.${pattern},tags.cs.{${q.trim()}}`
+      );
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return res.status(500).json({ error: `Database error: ${error.message}` });
