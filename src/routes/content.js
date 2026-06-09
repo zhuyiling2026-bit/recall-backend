@@ -48,7 +48,7 @@ router.post('/confirm', async (req, res, next) => {
 
     const { data, error } = await supabase
       .from('contents')
-      .insert({ url, title, summary, category, tags })
+      .insert({ user_id: req.userId, url, title, summary, category, tags })
       .select()
       .single();
 
@@ -87,7 +87,7 @@ router.post('/quick-save', async (req, res, next) => {
 
     const { data, error } = await supabase
       .from('contents')
-      .insert({ url, ...analysis })
+      .insert({ user_id: req.userId, url, ...analysis })
       .select()
       .single();
 
@@ -105,6 +105,7 @@ router.get('/list', async (req, res, next) => {
     let query = supabase
       .from('contents')
       .select('*')
+      .eq('user_id', req.userId)
       .order('created_at', { ascending: false });
 
     if (q && q.trim()) {
@@ -139,6 +140,7 @@ router.patch('/:id', async (req, res, next) => {
       .from('contents')
       .update({ status })
       .eq('id', id)
+      .eq('user_id', req.userId)
       .select()
       .single();
 

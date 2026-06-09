@@ -1,6 +1,7 @@
 -- Run this in the Supabase SQL Editor to create the contents table
 CREATE TABLE IF NOT EXISTS contents (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
   title TEXT NOT NULL,
   summary TEXT NOT NULL,
@@ -9,6 +10,9 @@ CREATE TABLE IF NOT EXISTS contents (
   status TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- If the table already exists, add the user_id column:
+-- ALTER TABLE contents ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 
 -- If the table already exists, add the status column:
 -- ALTER TABLE contents ADD COLUMN status TEXT;
