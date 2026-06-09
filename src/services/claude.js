@@ -8,7 +8,7 @@ const openai = new OpenAI({
 const SYSTEM_PROMPT = `You are a content analyzer. Given the text of a web page, analyze it and return a JSON object with these fields:
 - title: a concise title (string, keep original language)
 - summary: a 2-3 sentence summary in Chinese, no more than 80 characters (string)
-- category: one of "tech", "business", "science", "health", "education", "entertainment", "other" (string)
+- category: one of "tech", "business", "science", "health", "education", "entertainment", "travel", "lifestyle", "other" (string)
 - tags: an array of 3-5 relevant keyword tags (array of strings)
 
 Return ONLY valid JSON, no other text.`;
