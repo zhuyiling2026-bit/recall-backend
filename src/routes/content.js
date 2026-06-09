@@ -130,15 +130,19 @@ router.get('/list', async (req, res, next) => {
 router.patch('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const allowed = ['title', 'summary', 'category', 'tags', 'status'];
+    const patch = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) patch[key] = req.body[key];
+    }
 
-    if (!status || !['read', 'deleted'].includes(status)) {
-      return res.status(400).json({ error: 'status must be "read" or "deleted"' });
+    if (Object.keys(patch).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
     }
 
     const { data, error } = await supabase
       .from('contents')
-      .update({ status })
+      .update(patch)
       .eq('id', id)
       .eq('user_id', req.userId)
       .select()

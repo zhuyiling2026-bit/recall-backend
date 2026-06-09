@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import contentRouter from './routes/content.js';
+import categoriesRouter from './routes/categories.js';
 import { authMiddleware } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/content', authMiddleware, contentRouter);
+app.use('/categories', authMiddleware, categoriesRouter);
 
 app.use(errorHandler);
 

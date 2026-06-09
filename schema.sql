@@ -16,3 +16,14 @@ CREATE TABLE IF NOT EXISTS contents (
 
 -- If the table already exists, add the status column:
 -- ALTER TABLE contents ADD COLUMN status TEXT;
+
+-- Categories table — per-user category tabs
+CREATE TABLE IF NOT EXISTS categories (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  label TEXT NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, key)
+);
